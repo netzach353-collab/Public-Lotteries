@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>זירת ההימורים</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-50: #f8fafc;
+    --border: #e2e8f0;
+  }
+  
+html {
+  min-height: 100%;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  background: #fff;
+  color: #0f172a;
+  min-height: 100vh;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+
+  /* ---------- Layout ---------- */
+  .app {
+  display: flex;
+  min-height: 100vh;
+  height: auto;
+  width: 100%;
+  align-items: stretch;
+}
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    width: 260px; flex-shrink: 0; height: 100%;
+    background: linear-gradient(to bottom, #0f172a, #1e293b);
+    color: #fff; display: flex; flex-direction: column;
+  }
+  .brand { padding: 28px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
+  .brand-icon { width: 36px; height: 36px; border-radius: 12px; background: rgba(251,191,36,0.2); display: flex; align-items: center; justify-content: center; }
+  .brand-icon svg { width: 20px; height: 20px; color: #fbbf24; }
+  .brand h1 { font-size: 18px; font-weight: 600; }
+  .brand p { font-size: 12px; color: rgba(255,255,255,0.5); }
+  .nav { flex: 1; padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .nav-btn {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border-radius: 12px; border: none; cursor: pointer;
+    font-size: 14px; font-weight: 500; font-family: inherit;
+    background: transparent; color: rgba(255,255,255,0.7); transition: 0.2s;
+  }
+  .nav-btn svg { width: 20px; height: 20px; color: rgba(255,255,255,0.6); }
+  .nav-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .nav-btn.active { background: #fff; color: #0f172a; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+  .nav-btn.active svg { color: #f59e0b; }
+  .badge { margin-inline-start: auto; font-size: 12px; padding: 2px 8px; border-radius: 999px; font-weight: 600; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+  .nav-btn.active .badge { background: #fef3c7; color: #b45309; }
+  .sidebar-footer { padding: 24px; border-top: 1px solid rgba(255,255,255,0.1); }
+  .sidebar-footer p.label { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 4px; }
+  .sidebar-footer .pot-mini { font-size: 24px; font-weight: 700; color: #fbbf24; }
+  .sidebar-footer .pot-mini span { font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.4); }
+
+  /* ---------- Main ---------- */
+  
+.main {
+  flex: 1;
+  min-width: 0;
+  height: auto;
+  overflow: visible;
+  background: #f8fafc;
+  position: relative;
+}
+
+.view {
+  height: auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+.view.hidden {
+  display: none;
+}
+
+  /* ---------- Pot ---------- */
+  .pot-wrap { padding: 32px 32px 24px; }
+  .pot {
+    background: linear-gradient(135deg, #fbbf24, #f97316);
+    border-radius: 24px; padding: 28px; position: relative; overflow: hidden;
+    box-shadow: 0 20px 40px rgba(245,158,11,0.25);
+  }
+  .pot::before, .pot::after { content: ""; position: absolute; border-radius: 50%; background: rgba(255,255,255,0.1); }
+  .pot::before { width: 128px; height: 128px; top: -32px; left: -32px; }
+  .pot::after { width: 96px; height: 96px; bottom: -40px; right: -16px; }
+  .pot-inner { position: relative; display: flex; align-items: center; justify-content: space-between; }
+  .pot-label { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .pot-label svg { width: 16px; height: 16px; }
+  .pot-value { font-size: 48px; font-weight: 700; color: #fff; line-height: 1; }
+  .pot-sub { color: rgba(255,255,255,0.75); font-size: 14px; margin-top: 6px; }
+  .pot-icon { width: 80px; height: 80px; border-radius: 20px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; }
+  .pot-icon svg { width: 40px; height: 40px; color: #fff; }
+  .pot-chips { position: relative; margin-top: 20px; display: flex; gap: 8px; }
+  .chip { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.85); font-weight: 500; }
+
+  /* ---------- List header ---------- */
+  .list-head { padding: 0 32px 12px; display: flex; align-items: center; justify-content: space-between; }
+  .list-head h2 { font-size: 18px; font-weight: 600; }
+  .btn-join {
+    display: inline-flex; align-items: center; gap: 6px; border: none; cursor: pointer;
+    background: #0f172a; color: #fff; padding: 9px 16px; border-radius: 999px;
+    font-size: 14px; font-family: inherit; font-weight: 500; transition: 0.2s;
+  }
+  .btn-join:hover { background: #1e293b; }
+  .btn-join svg { width: 16px; height: 16px; }
+
+  /* ---------- Bettors ---------- */
+  
+
+.list-body {
+  flex: none;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  padding: 0 16px 32px;
+}
+
+ .bettor { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 16px; transition: 0.15s; }
+  .bettor:hover { background: #fff; }
+  .avatar { width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 18px; }
+  .bettor-main { flex: 1; min-width: 0; }
+  .bettor-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .bettor-name { font-weight: 600; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bettor-time { font-size: 12px; color: #94a3b8; flex-shrink: 0; }
+  .bettor-sub { font-size: 14px; color: #64748b; display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .bettor-sub svg { width: 14px; height: 14px; color: #f59e0b; }
+
+  .empty { text-align: center; padding: 64px 16px; color: #94a3b8; }
+  .empty svg { width: 48px; height: 48px; opacity: 0.4; margin-bottom: 12px; }
+  .empty p { font-size: 14px; }
+
+  /* ---------- Forum ---------- */
+  .forum-head { padding: 32px 32px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .forum-title { display: flex; align-items: center; gap: 12px; }
+  .forum-title .ft-icon { width: 40px; height: 40px; border-radius: 12px; background: #0f172a; display: flex; align-items: center; justify-content: center; }
+  .forum-title .ft-icon svg { width: 20px; height: 20px; color: #fff; }
+  .forum-title h2 { font-size: 20px; font-weight: 700; }
+  .forum-title p { font-size: 14px; color: #64748b; }
+  .btn-x { width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer; background: #f1f5f9; color: #475569; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+  .btn-x:hover { background: #e2e8f0; }
+  .btn-x svg { width: 20px; height: 20px; }
+
+  .comments { flex: 1; overflow-y: auto; padding: 0 32px 24px; }
+  .comment { display: flex; gap: 12px; margin-bottom: 16px; }
+  .comment .avatar { width: 40px; height: 40px; font-size: 15px; }
+  .bubble { background: #f1f5f9; border-radius: 16px; border-top-right-radius: 4px; padding: 12px 16px; }
+  .bubble-top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .bubble-top .c-name { font-weight: 600; font-size: 14px; color: #0f172a; }
+  .bubble-top .c-time { font-size: 12px; color: #94a3b8; }
+  .bubble-text { font-size: 14px; color: #334155; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+
+  .comment-form { padding: 20px 32px; border-top: 1px solid var(--border); background: #fff; display: flex; flex-direction: column; gap: 10px; }
+  .row { display: flex; gap: 8px; }
+  .input {
+    flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px;
+    font-size: 14px; font-family: inherit; color: #0f172a; outline: none; transition: 0.2s;
+  }
+  .input:focus { border-color: #94a3b8; }
+  .btn-send { border: none; cursor: pointer; background: #0f172a; color: #fff; border-radius: 12px; padding: 0 16px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+  .btn-send:hover { background: #1e293b; }
+  .btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-send svg { width: 18px; height: 18px; }
+
+  /* ---------- Modal ---------- */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center; z-index: 50; padding: 16px;
+  }
+  .overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 24px; padding: 28px; width: 100%; max-width: 380px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); }
+  .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .modal-head h3 { font-size: 20px; font-weight: 700; }
+  .modal-head button { background: none; border: none; cursor: pointer; color: #94a3b8; }
+  .modal-head button svg { width: 20px; height: 20px; }
+  .cost { background: #fffbeb; border-radius: 16px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+  .cost .cost-icon { width: 40px; height: 40px; border-radius: 50%; background: #fbbf24; display: flex; align-items: center; justify-content: center; }
+  .cost .cost-icon svg { width: 20px; height: 20px; color: #fff; }
+  .cost b { font-weight: 600; }
+  .cost span { font-size: 12px; color: #64748b; }
+  .modal label { font-size: 14px; font-weight: 500; color: #334155; display: block; margin-bottom: 8px; }
+  .btn-confirm {
+    width: 100%; border: none; cursor: pointer; background: #f59e0b; color: #fff;
+    height: 48px; border-radius: 12px; font-size: 16px; font-weight: 600; font-family: inherit;
+    margin-top: 16px; transition: 0.2s;
+  }
+  .btn-confirm:hover { background: #d97706; }
+  .btn-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* התאמת הסרגל לטלפונים */
+@media (max-width: 640px) {
+  .app {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 12px;
+    gap: 10px;
+    overflow: hidden;
+  }
+
+  .brand {
+    padding: 0;
+    border: none;
+    flex-shrink: 0;
+  }
+
+  .brand-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+  }
+
+  .brand-icon svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .brand h1 {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .brand p {
+    display: none;
+  }
+
+  .nav {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    min-width: 0;
+    margin-inline-start: auto;
+    padding: 0;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  .nav-btn {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    padding: 10px 6px;
+    gap: 5px;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .nav-btn svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .nav-btn .badge {
+    display: none;
+  }
+
+  .sidebar-footer {
+    display: none;
+  }
+
+  .pot-wrap {
+    padding: 16px;
+  }
+
+  .pot {
+    padding: 20px;
+  }
+
+  .pot-value {
+    font-size: 36px;
+  }
+
+  .pot-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .pot-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .list-head {
+    padding: 0 16px 10px;
+  }
+
+  .forum-head {
+    padding: 16px;
+  }
+
+  .comments {
+    padding: 0 16px 16px;
+  }
+
+  .comment-form {
+    padding: 14px 16px;
+  }
+}
+
+.name1{
+    flex-direction: column;
+    display: flex;
+    align-items: center;
+}
+
+/* טופס הצטרפות משופר */
+.modal {
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.join-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.join-form label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-top: 8px;
+}
+
+.join-form .input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+}
+
+.join-form textarea.input {
+  min-height: 110px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.join-id {
+  background: #f1f5f9;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  direction: rtl;
+}
+
+.join-id-label {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.join-id-value {
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 700;
+  direction: ltr;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.join-form .btn-confirm {
+  margin-top: 16px;
+}
+
+.bettor-id {
+  color: #64748b;
+  font-size: 12px;
+  direction: ltr;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.bettor-about {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .join-form textarea.input {
+    min-height: 90px;
+  }
+}
+  
+  /* התאמת חלונית ההצטרפות למובייל ולמקלדת */
+#joinModal {
+  padding: 12px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#joinModal .modal {
+  width: 100%;
+  max-width: 440px;
+  max-height: 85vh;
+  max-height: 85dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  margin: auto;
+}
+
+#joinName,
+#joinPhone,
+#joinAbout {
+  scroll-margin-top: 24px;
+  scroll-margin-bottom: 30px;
+}
+
+#joinModal .input:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+@media (max-width: 640px) {
+  #joinModal {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  #joinModal .modal {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+
+  #joinModal .modal-head {
+    position: sticky;
+    top: -20px;
+    z-index: 2;
+    background: #fff;
+    padding: 8px 0;
+  }
+}
+  
+  .join-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* כפתור מידע ייחודי לטופס ההגרלה */
+button.raffle-info-trigger {
+  all: unset;
+  box-sizing: border-box;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #38bdf8;
+  color: #ffffff;
+  border: 1px solid #38bdf8;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  cursor: pointer;
+}
+
+button.raffle-info-trigger:hover {
+  background: #0ea5e9;
+  border-color: #0ea5e9;
+}
+
+button.raffle-info-trigger:focus-visible {
+  outline: 2px solid #0284c7;
+  outline-offset: 3px;
+}
+
+#infoModal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+}
+
+#infoModal.open {
+  display: flex;
+}
+
+#infoModal .info-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 440px;
+  max-height: 85vh;
+  max-height: 85dvh;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+}
+
+.info-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 24px;
+  color: #334155;
+  font-size: 15px;
+  line-height: 1.9;
+  white-space: pre-line;
+}
+
+.info-content h4 {
+  color: #0f172a;
+  font-size: 21px;
+  margin-bottom: 14px;
+}
+
+.info-footer {
+  flex-shrink: 0;
+  padding: 14px 20px;
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+  border-top: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.info-approve {
+  width: 100%;
+  min-height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: #0f172a;
+  color: #fff;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.info-approve:hover {
+  background: #1e293b;
+}
+
+@media (max-width: 480px) {
+  #infoModal {
+    align-items: flex-start;
+  }
+
+  #infoModal .info-panel {
+    max-height: calc(100dvh - 24px);
+    margin-top: 4px;
+  }
+}
+
+
+.modern-dice {
+  width: 42px;
+  height: 42px;
+  display: block;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  transform-origin: center;
+}
+
+.modern-dice svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+  
+  .pot-chips {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+#lastWinnerChip {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+      </div>
+      <div>
+        <h1>זירת ההימורים</h1>
+        <p>משחק חברתי</p>
+      </div>
+    </div>
+    <nav class="nav">
+      
+<button
+  type="button"
+  class="raffle-info-trigger top-info-trigger more-color"
+  aria-label="מידע על ההגרלה"
+  onclick="document.getElementById('infoModal').classList.add('open')"
+>ⓘ</button>
+
+      <button class="nav-btn active" data-view="betting">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
+        <span>דף ראשי</span>
+        <span class="badge" id="navCount">4</span>
+      </button>
+      <button class="nav-btn" data-view="forum">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+        <span>פורום</span>
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <p class="label">קופה נוכחית</p>
+      <p class="pot-mini" id="sidePot">0 <span>מטבעות</span></p>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Betting view -->
+    <div class="view" id="view-betting">
+      <div class="pot-wrap">
+        <div class="pot">
+          <div class="pot-inner">
+            <div>
+              <div class="pot-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+                סכום קופה 
+              </div>
+              <div class="pot-value" id="potValue">0</div>
+              </div>
+            <div class="pot-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
+            </div>
+          </div>
+        
+<div class="pot-chips">
+  <span class="chip" id="chipCount">0 מהמרים</span>
+  <span class="chip">100 מטבעות לכניסה</span>
+  <span class="chip" id="lastWinnerChip">זוכה — • קוד —</span>
+</div>
+
+        </div>
+      </div>
+
+      <div class="list-head">
+        <h2>משתתפים</h2>
+        <button class="btn-join" id="openJoin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          הצטרף להימור
+        </button>
+      </div>
+
+      <div class="list-body" id="bettorsList"></div>
+    </div>
+
+    <!-- Forum view -->
+    <div class="view hidden" id="view-forum">
+      <div class="forum-head">
+        <div class="forum-title">
+          <div class="ft-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+          </div>
+          <div>
+            <h2>פורום</h2>
+            <p id="commentCount">2 תגובות</p>
+          </div>
+        </div>
+        <button class="btn-x" id="exitForum" title="צא מהתגובות">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="comments" id="commentsList"></div>
+
+      <div class="comment-form">
+        <input class="input" id="commentName" placeholder="השם שלך" />
+        <div class="row">
+          <input class="input" id="commentText" placeholder="כתוב תגובה..." />
+          <button class="btn-send" id="sendComment" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Join modal -->
+<div class="overlay" id="joinModal">
+  <div class="modal" role="dialog" aria-modal="true"
+       aria-labelledby="joinModalTitle">
+
+    <div class="modal-head">
+      <h3 id="joinModalTitle">הצטרפות להגרלה</h3>
+<button id="openInfo" type="button" class="raffle-info-trigger" aria-label="מידע נוסף">ⓘ</button>      <button id="closeJoin" type="button" aria-label="סגירה">
+        <svg viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18"/>
+          <path d="m6 6 12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="cost">
+      <div class="cost-icon">
+        <svg viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="8" r="6"/>
+          <path d="M18.09 10.37A6 6 0 1 1 10.34 18"/>
+          <path d="M7 6h1v4"/>
+          <path d="m16.71 13.88.7.71-2.82 2.82"/>
+        </svg>
+      </div>
+
+      <div>
+        <b>100 מטבעות וירטואליים</b>
+        <span style="display:block">
+          עלות ההצטרפות להגרלה
+        </span>
+      </div>
+    </div>
+
+    <form class="join-form" id="joinForm">
+
+      <div class="join-id">
+        <span class="join-id-label">המספר המזהה שלך</span>
+        <span class="join-id-value" id="joinIdPreview">
+          ייווצר אוטומטית
+        </span>
+      </div>
+
+      <label for="joinName">שם</label>
+      <input
+        class="input"
+        id="joinName"
+        name="name"
+        type="text"
+        placeholder="השם שלך"
+        maxlength="60"
+        autocomplete="name"
+        required
+      />
+
+      <label for="joinPhone">מספר טלפון</label>
+      <input
+        class="input"
+        id="joinPhone"
+        name="phone"
+        type="tel"
+        placeholder="מספר טלפון"
+        autocomplete="tel"
+        inputmode="tel"
+        maxlength="20"
+        required
+      />
+
+      <label for="joinAbout">קצת עליי</label>
+      <textarea
+        class="input"
+        id="joinAbout"
+        name="about"
+        placeholder="ספר קצת על עצמך..."
+        maxlength="500"
+        rows="4"
+      ></textarea>
+
+      <button
+        class="btn-confirm"
+        id="confirmJoin"
+        type="submit"
+        disabled
+      >
+        הצטרף להגרלה — 100 מטבעות
+      </button>
+
+    </form>
+  </div>
+</div>
+  <!-- באנר מידע נוסף -->
+<div class="overlay" id="infoModal">
+  <div class="info-panel" role="dialog"
+       aria-modal="true"
+       aria-labelledby="infoTitle">
+
+    <div class="info-content">
+      <h4 id="infoTitle">מידע חשוב לפני ההצטרפות</h4>
+
+      <!-- החלף כאן את הטקסט הפיקטיבי שלך -->
+
+      <p>ברוכים הבאים לזירת ההימורים!</p>
+
+      <p>כאן ניתן להוסיף הסבר על אופן ההשתתפות, כללי המשחק, תנאי ההצטרפות וכל מידע אחר שחשוב למשתמש לקרוא לפני שהוא ממשיך.</p>
+
+      <p>זהו טקסט לדוגמה בלבד. ניתן להחליף אותו בטקסט שלך, להוסיף כותרות ופסקאות, ולערוך את התוכן כרצונך.</p>
+
+      <p>אפשר להוסיף כאן גם הסברים ארוכים. אזור הטקסט ניתן לגלילה, בעוד שכפתור האישור נשאר קבוע בתחתית הבאנר.</p>
+    </div>
+
+    <div class="info-footer">
+      <button type="button" id="approveInfo"
+              class="info-approve">
+        קראתי ואני מאשר
+      </button>
+    </div>
+
+  </div>
+</div>
+<!-- טעינת ספריית Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- יצירת החיבור לפרויקט -->
+  
+<script>
+(() => {
+  const db = window.supabase.createClient(
+    "https://kxttoscdrdyckbhhhyvl.supabase.co",
+    "sb_publishable_XbYvk8WDbZOSeZvtP4IDkg_r0TwmNrs"
+  );
+
+  const $ = id => document.getElementById(id);
+
+  const form = $("joinForm");
+  const modal = $("joinModal");
+  const nameInput = $("joinName");
+  // באנר מידע לפני המשך ההצטרפות
+const infoModal = $("infoModal");
+const openInfoButton = $("openInfo");
+const approveInfoButton = $("approveInfo");
+
+openInfoButton.addEventListener("click", () => {
+  infoModal.classList.add("open");
+});
+
+approveInfoButton.addEventListener("click", () => {
+  infoModal.classList.remove("open");
+
+  // חוזרים לטופס ההצטרפות בלי לאפס את הפרטים
+  modal.classList.add("open");
+});
+
+infoModal.addEventListener("click", event => {
+  if (event.target === infoModal) {
+    infoModal.classList.remove("open");
+    modal.classList.add("open");
+  }
+});
+  const phoneInput = $("joinPhone");
+  const aboutInput = $("joinAbout");
+  const confirmButton = $("confirmJoin");
+
+  let countdownInterval = null;
+  let joining = false;
+
+let joinAllowed = true;
+let wakeInProgress = false;
+let currentRoundId = null;
+  let lastWinnerChipRoundId = null;
+let closingRequestedFor = null;
+let drawRequestedFor = null;
+
+
+let participantNames = [];
+let nameRollInterval = null;
+let resultPollInterval = null;
+let resultPollRoundId = null;
+
+// ניהול תצוגת הזוכה בנפרד מרשימת המשתתפים
+let displayedWinnerKey = null;
+let winnerDisplayUntil = 0;
+
+
+
+  // פתיחת וסגירת טופס
+
+
+$("openJoin")?.addEventListener("click", () => {
+  if (!joinAllowed) {
+    alert("ההצטרפות להגרלה סגורה כרגע.");
+    return;
+  }
+
+  modal.classList.add("open");
+  updateJoinButton();
+
+  requestAnimationFrame(() => {
+    nameInput.focus();
+
+    setTimeout(() => {
+      nameInput.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    }, 300);
+  });
+});
+
+
+
+  $("closeJoin")?.addEventListener("click", () => {
+    modal.classList.remove("open");
+  });
+
+  modal?.addEventListener("click", event => {
+    if (event.target === modal) {
+      modal.classList.remove("open");
+    }
+  });
+
+  // מעבר בין המסכים
+  document.querySelectorAll(".nav-btn").forEach(button => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll(".nav-btn")
+        .forEach(item => item.classList.remove("active"));
+
+      button.classList.add("active");
+
+      $("view-betting").classList.toggle(
+        "hidden",
+        button.dataset.view !== "betting"
+      );
+
+      $("view-forum").classList.toggle(
+        "hidden",
+        button.dataset.view !== "forum"
+      );
+    });
+  });
+
+  $("exitForum")?.addEventListener("click", () => {
+    document.querySelector('[data-view="betting"]')?.click();
+  });
+
+  // יצירת תצוגת קוד מזהה
+  // הקוד הסופי חייב להיקבע על ידי השרת.
+  $("joinIdPreview").textContent =
+    "ייווצר בעת ההצטרפות";
+
+  // בדיקת טופס
+  function updateJoinButton() {
+    const validName = nameInput.value.trim().length >= 2;
+    const digits = phoneInput.value.replace(/\D/g, "");
+    const validPhone = digits.length >= 10;
+
+    confirmButton.disabled =
+      !(validName && validPhone) || joining;
+  }
+
+  [nameInput, phoneInput, aboutInput].forEach(input => {
+    input.addEventListener("input", updateJoinButton);
+  });
+
+  // הצטרפות דרך פונקציית שרת מאובטחת
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    if (!joinAllowed) {
+  alert("ההצטרפות להגרלה נסגרה.");
+  return;
+}
+
+    if (joining) return;
+
+    const fullName = nameInput.value.trim();
+    const phone = phoneInput.value.trim();
+    const about = aboutInput.value.trim();
+
+    if (fullName.length < 2) {
+      alert("נא להזין שם מלא.");
+      return;
+    }
+
+    if (phone.replace(/\D/g, "").length < 9) {
+      alert("נא להזין מספר טלפון תקין.");
+      return;
+    }
+
+    if (about.length > 500) {
+      alert("התיאור ארוך מדי.");
+      return;
+    }
+
+    joining = true;
+    confirmButton.disabled = true;
+    confirmButton.textContent = "מצרף אותך...";
+
+    try {
+      const { data, error } = await db.rpc("join_raffle", {
+        p_full_name: fullName,
+        p_phone: phone,
+        p_about: about
+      });
+
+      if (error) throw error;
+
+      const result = Array.isArray(data) ? data[0] : data;
+      
+      if (!result || !result.participant_code) {
+        throw new Error("השרת לא החזיר קוד משתתף.");
+      }
+
+      alert(
+        "הצטרפת בהצלחה!\n" +
+        "הקוד המזהה שלך: " +
+        String(result.participant_code).padStart(4, "0")
+      );
+
+      form.reset();
+      modal.classList.remove("open");
+
+      await Promise.all([
+        loadParticipants(),
+        loadPot(),
+        loadRound()
+      ]);
+
+    } catch (error) {
+      console.error("Join error:", error);
+
+      alert(
+        "לא ניתן להשלים את ההצטרפות כרגע.\n" +
+        "יש לוודא שפונקציית join_raffle הוגדרה ב-Supabase."
+      );
+
+    } finally {
+      joining = false;
+      confirmButton.textContent =
+        "הצטרף להגרלה — 100 מטבעות";
+
+      updateJoinButton();
+    }
+  });
+
+  // טעינת משתתפים ציבוריים
+  // טעינת משתתפים ציבוריים
+  // טעינת משתתפים ציבוריים
+  async function loadParticipants() {
+    const el = $("bettorsList");
+
+    const { data, error } = await db.rpc("get_raffle_participants");
+
+    if (error) {
+      console.error("Participants error:", error);
+      return;
+    }
+
+    const bettors = (data || []).map(function (b) {
+      return {
+        name: b.full_name || "",
+        time: b.created_at
+  ? new Date(b.created_at).toLocaleTimeString("he-IL", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    })
+  : "",
+        publicId: b.participant_code != null
+          ? String(b.participant_code).padStart(4, "0")
+          : "טרם הוקצה"
+      };
+    });
+
+
+participantNames = bettors
+  .map(b => b.name)
+  .filter(name => name.trim().length > 0);
+
+    $("navCount").textContent = bettors.length;
+    $("chipCount").textContent = bettors.length + "   מהמרים כרגע ";
+
+    const coinsSvg = `
+      <svg viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="8" cy="8" r="6"/>
+        <path d="M18.09 10.37A6 6 0 1 1 10.34 18"/>
+        <path d="M7 6h1v4"/>
+        <path d="m16.71 13.88.7.71-2.82 2.82"/>
+      </svg>
+    `;
+
+    const COLORS = [
+      "#f59e0b",
+      "#6366f1",
+      "#10b981",
+      "#ec4899",
+      "#0ea5e9",
+      "#8b5cf6",
+      "#f97316",
+      "#14b8a6"
+    ];
+
+    const esc = function (value) {
+      return String(value).replace(/[&<>"']/g, function (char) {
+        return {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        }[char];
+      });
+    };
+
+    if (bettors.length === 0) {
+      el.innerHTML =
+        '<div class="empty">' +
+        coinsSvg +
+        '<p>עדיין אין משתתפים. היה הראשון להצטרף!</p>' +
+        '</div>';
+    } else {
+      el.innerHTML = bettors.map(function (b, i) {
+        return `
+          <div class="bettor">
+            <div class="avatar"
+                 style="background:${COLORS[i % COLORS.length]}">
+              ${esc(b.name.charAt(0))}
+            </div>
+
+            <div class="bettor-main">
+              <div class="bettor-top">
+                <p class="bettor-name">${esc(b.name)}</p>
+                <span class="bettor-time">${esc(b.time)}</span>
+              </div>
+
+              <p class="bettor-id">
+                מזהה: ${esc(b.publicId)}
+              </p>
+
+              <p class="bettor-sub">
+                ${coinsSvg}
+                הצטרף עם 100 מטבעות
+              </p>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+  }
+
+  function formatTime(value) {
+    if (!value) return "";
+
+    return new Date(value).toLocaleTimeString("he-IL", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+
+  // טעינת הקופה
+  
+async function loadPot() {
+  const { data, error } = await db.rpc("get_raffle_participants");
+
+  if (error) {
+    console.error("Pot calculation error:", error);
+    return;
+  }
+
+  const amount = (data || []).length * 100;
+  const formattedAmount = amount.toLocaleString("he-IL");
+
+  if ($("potValue")) {
+    $("potValue").textContent = formattedAmount;
+  }
+
+  if ($("sidePot")) {
+    $("sidePot").innerHTML =
+      formattedAmount + " <span>מטבעות</span>";
+  }
+}
+
+
+function updateLastWinner(name, code) {
+  const chip = $("lastWinnerChip");
+  if (!chip) return;
+
+  if (!name || code == null) {
+    chip.textContent = "זוכה — • קוד —";
+    return;
+  }
+
+  chip.textContent =
+    "זוכה קודם " + name +
+    " ● מזהה " + String(code).padStart(4, "0");
+}
+
+
+async function loadRound() {
+  try {
+    const { data: activeRounds, error: activeError } = await db
+      .from("raffle_rounds")
+      .select("id, status, ends_at, winner_code")
+      .in("status", ["open", "closing"])
+      .order("id", { ascending: false })
+      .limit(1);
+
+    if (activeError) throw activeError;
+
+    if (activeRounds?.length) {
+      const round = activeRounds[0];
+      currentRoundId = round.id;
+
+      const remaining = round.ends_at
+        ? new Date(round.ends_at).getTime() - Date.now()
+        : 0;
+
+      joinAllowed =
+  round.status === "open" &&
+  remaining > 120000;
+
+      updateJoinButton();
+
+      
+      if (round.ends_at) {
+        startCountdown(round.ends_at, round.status, round.id);
+      } else {
+        showCountdown("ההגרלה פעילה");
+      }
+
+      // מעדכנים את הזוכה הקודם רק כשהתחילה הגרלה חדשה
+      if (lastWinnerChipRoundId !== round.id) {
+        await loadLatestWinner();
+        lastWinnerChipRoundId = round.id;
+      }
+
+      return;
+    }
+
+    currentRoundId = null;
+    joinAllowed = true;
+    updateJoinButton();
+
+    const { data: rounds, error: roundsError } = await db
+      .from("raffle_rounds")
+      .select("id, status, winner_code")
+      .eq("status", "drawn")
+      .order("id", { ascending: false })
+      .limit(1);
+
+    if (roundsError) throw roundsError;
+
+    if (!rounds?.length) {
+      showCountdown("ממתינים להגרלה");
+      startRaffleMessages();
+      return;
+    }
+
+    const lastRound = rounds[0];
+
+    if (lastRound.winner_code == null) {
+      showCountdown("טרם נקבע זוכה");
+      return;
+    }
+
+    const { data: winners, error: winnerError } = await db.rpc(
+      "get_public_latest_winner_v2"
+    );
+
+    if (winnerError) throw winnerError;
+
+    const winner = (winners || []).find(
+      item =>
+        Number(item.round_id) === Number(lastRound.id) &&
+        Number(item.participant_code) === Number(lastRound.winner_code)
+    );
+
+    showWinnerBanner(
+      winner?.full_name || "לא נמצא שם לזוכה",
+      lastRound.winner_code,
+      true
+    );
+
+  
+} catch (error) {
+  console.error("שגיאה בטעינת ההגרלה:", {
+    message: error?.message,
+    code: error?.code,
+    details: error?.details,
+    hint: error?.hint,
+    error
+  });
+}
+
+}
+
+
+async function wakeRaffleEngine(roundId, phase) {
+  if (wakeInProgress) return;
+  wakeInProgress = true;
+
+  try {
+    const { data, error } = await db.functions.invoke("wake-raffle", {
+      method: "POST"
+    });
+
+    if (error) throw error;
+
+    if (data?.reason === "paused") {
+      joinAllowed = false;
+      stopCountdown();
+      showCountdown("יצאנו להפסקה");
+      return;
+    }
+
+    if (data?.ok) {
+      joinAllowed = false;
+      stopCountdown();
+      stopNameRoll();
+
+      const winnerCode = data.winner_code;
+
+      const { data: winner, error: winnerError } = await db
+        .from("raffle_winners")
+        .select("full_name, participant_code")
+        .eq("round_id", roundId)
+        .eq("participant_code", winnerCode)
+        .maybeSingle();
+
+      if (winnerError) {
+        console.error("שגיאה בטעינת הזוכה:", winnerError);
+        showCountdown("ההגרלה הסתיימה · קוד " +
+          String(winnerCode).padStart(4, "0"));
+      } else if (winner?.full_name) {
+        showWinnerBanner(
+          winner.full_name,
+          winner.participant_code ?? winnerCode
+        );
+      } else {
+        showCountdown("ההגרלה הסתיימה · קוד " +
+          String(winnerCode).padStart(4, "0"));
+      }
+
+      await loadPot();
+      await loadParticipants();
+      return;
+    }
+
+    if (["not_due", "closing", "already_drawn"].includes(data?.reason)) {
+      showCountdown(
+        phase === "close"
+          ? "ההצטרפות נסגרת..."
+          : "מגרילים זוכה..."
+      );
+      return;
+    }
+
+    if (data?.reason === "not_enough_participants") {
+      joinAllowed = false;
+      showCountdown("אין מספיק משתתפים להגרלה");
+      return;
+    }
+
+    console.log("Raffle response:", data);
+
+  } catch (error) {
+    console.error("שגיאה בהפעלת ההגרלה:", error);
+    showCountdown("שגיאה בהפעלת ההגרלה");
+  } finally {
+    wakeInProgress = false;
+  }
+}
+
+
+
+function startCountdown(endsAt, status, roundId) {
+  stopCountdown();
+  stopNameRoll();
+
+  const oldBanner = $("raffleWinnerBanner");
+  if (oldBanner) oldBanner.remove();
+
+  const endTime = new Date(endsAt).getTime();
+
+  function tick() {
+    if (currentRoundId !== roundId) return;
+
+    const remaining = Math.max(0, endTime - Date.now());
+
+    joinAllowed =
+  status === "open" &&
+  remaining > 120000;
+
+    if (remaining > 0 && remaining <= 60000) {
+      // בדקה האחרונה מציגים שמות בלבד, ללא טיימר
+      rollParticipantNames();
+      return;
+    } else {
+      stopNameRoll();
+    }
+
+    if (remaining > 60000) {
+      const hours = Math.floor(remaining / 3600000);
+      const minutes = Math.floor((remaining % 3600000) / 60000);
+      const seconds = Math.floor((remaining % 60000) / 1000);
+
+      
+const label = $("raffleCountdownLabel");
+
+if (label) {
+  label.textContent = "ההגרלה תתקיים בעוד";
+}
+
+showCountdown(
+  String(hours).padStart(2, "0") + ":" +
+  String(minutes).padStart(2, "0") + ":" +
+  String(seconds).padStart(2, "0")
+);
+
+    } else {
+      joinAllowed = false;
+      updateJoinButton();
+      stopNameRoll();
+      showCountdown("ממתינים לתוצאה...");
+      startResultPolling(roundId);
+    }
+  }
+
+  tick();
+  countdownInterval = setInterval(tick, 1000);
+}
+
+
+
+function rollParticipantNames() {
+  if (nameRollInterval || participantNames.length === 0) return;
+
+  const timer = $("raffleCountdown");
+  let dice = $("raffleRollingDice");
+
+  if (!dice && timer) {
+    dice = document.createElement("div");
+    dice.id = "raffleRollingDice";
+
+    dice.innerHTML = `
+  <img
+    src="./dice-gold.png"
+    alt="קוביית זהב"
+    style="
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+    "
+  />
+`;
+
+    dice.style.cssText = [
+      "width:70px",
+      "height:70px",
+      "margin:8px auto",
+      "display:flex",
+      "align-items:center",
+      "justify-content:center",
+      "animation:raffleDiceRoll 0.8s linear infinite"
+    ].join(";");
+
+    let style = $("raffleDiceAnimationStyle");
+
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "raffleDiceAnimationStyle";
+      style.textContent = `
+        @keyframes raffleDiceRoll {
+          0%   { transform: rotate(0deg) scale(1); }
+          25%  { transform: rotate(90deg) scale(1.15); }
+          50%  { transform: rotate(180deg) scale(1); }
+          75%  { transform: rotate(270deg) scale(1.15); }
+          100% { transform: rotate(360deg) scale(1); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    timer.insertAdjacentElement("beforebegin", dice);
+  }
+
+  const showRandomName = () => {
+    const name = participantNames[
+      Math.floor(Math.random() * participantNames.length)
+    ];
+
+    showCountdown(name);
+  };
+
+  showRandomName();
+  nameRollInterval = setInterval(showRandomName, 1500);
+}
+
+
+function stopNameRoll() {
+  if (nameRollInterval) {
+    clearInterval(nameRollInterval);
+    nameRollInterval = null;
+  }
+
+  const dice = $("raffleRollingDice");
+  if (dice) dice.remove();
+}
+
+
+let raffleMessageInterval = null;
+
+function startRaffleMessages() {
+  const label = document.getElementById("raffleCountdownLabel");
+  if (!label) return;
+
+  const messages = [
+    "מי יהיה הזוכה?",
+    "ההגרלה בדרך...",
+    "ההגרלה תתקיים בשעה עגולה"
+  ];
+
+  if (raffleMessageInterval) {
+    clearInterval(raffleMessageInterval);
+  }
+
+  let index = 0;
+  label.textContent = messages[index];
+
+  raffleMessageInterval = setInterval(() => {
+    index = (index + 1) % messages.length;
+    label.textContent = messages[index];
+  }, 3000);
+}
+
+function showWinnerBanner(name, code, isLast = false) {
+  const pot = document.querySelector(".pot");
+  if (!pot) return;
+
+  if (raffleMessageInterval) {
+  clearInterval(raffleMessageInterval);
+  raffleMessageInterval = null;
+}
+
+  // עצירת גלגול השמות והסרת הקובייה כשהזוכה מוצג
+stopNameRoll();
+
+const dice = document.getElementById("raffleRollingDice");
+if (dice) dice.remove();
+
+  document.querySelectorAll("#raffleWinnerBanner")
+    .forEach(el => el.remove());
+
+  const labels = document.querySelectorAll("#raffleCountdownLabel");
+  let label = labels[0] || null;
+
+  labels.forEach((el, index) => {
+    if (index > 0) el.remove();
+  });
+
+  if (!label) {
+    label = document.createElement("div");
+    label.id = "raffleCountdownLabel";
+  }
+
+  label.textContent = " הזוכה בהגרלה";
+  label.style.cssText = [
+    "text-align:center",
+    "color:white",
+    "font-size:14px",
+    "font-weight:700",
+    "margin-top:20px"
+  ].join(";");
+
+  if (label.parentElement !== pot) {
+    pot.appendChild(label);
+  }
+
+
+
+  const winnerName = document.createElement("div");
+winnerName.textContent = name;
+winnerName.style.cssText = [
+  "color:#F8D77A",
+  "font-size:37px",
+ 
+  "width:100%",
+  "margin:12px auto",
+  "display:flex",
+  "align-items:center",
+  "justify-content:center",
+  "text-align:center",
+  "font-weight:900",
+  "line-height:1.1",
+  "overflow-wrap:anywhere",
+  "padding:5px",
+ 
+  "border-radius:14px",
+  "box-sizing:border-box"
+].join(";");
+
+  const winnerId = document.createElement("div");
+  winnerId.textContent =
+    "מזהה: " + String(code).padStart(4, "0");
+
+  winnerId.style.cssText = [
+    "color:#E2E8F0",
+    "font-size:14px",
+    "font-weight:600",
+    "margin-top:5px",
+    "letter-spacing:0.5px"
+  ].join(";");
+
+  const winnerBox = document.createElement("div");
+  winnerBox.id = "raffleWinnerBanner";
+  winnerBox.style.cssText = [
+    "text-align:center",
+    "margin:12px auto 0",
+    "padding:16px 20px",
+    "max-width:320px",
+    "direction:rtl"
+  ].join(";");
+
+  winnerBox.append(winnerName, winnerId);
+  
+  label.insertAdjacentElement("afterend", winnerBox);
+  
+  const timer = document.getElementById("raffleCountdown");
+  if (timer) {
+    timer.textContent = "";
+    timer.style.display = "none";
+  }
+}
+  
+
+
+
+function startResultPolling(roundId) {
+  if (resultPollRoundId === roundId) return;
+
+  if (resultPollInterval) clearInterval(resultPollInterval);
+
+  resultPollRoundId = roundId;
+
+  checkRoundResult(roundId);
+  resultPollInterval = setInterval(() => {
+    checkRoundResult(roundId);
+  }, 2000);
+}
+
+
+  function stopCountdown() {
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+  }
+
+  function showCountdown(value) {
+  const pot = document.querySelector(".pot");
+  if (!pot) return;
+
+  // מוחקים תוויות LIVE כפולות
+  const labels = document.querySelectorAll("#raffleCountdownLabel");
+  let label = labels[0] || null;
+
+  labels.forEach((item, index) => {
+    if (index > 0) item.remove();
+  });
+
+  // יוצרים תווית LIVE אחת בלבד
+  if (!label) {
+    label = document.createElement("div");
+    label.id = "raffleCountdownLabel";
+    label.textContent = "";
+    label.style.cssText =
+      "text-align:center;color:#fff;font-size:15px;margin-top:20px";
+  }
+
+  let timer = document.getElementById("raffleCountdown");
+
+  if (!timer) {
+    timer = document.createElement("div");
+    timer.id = "raffleCountdown";
+    timer.style.cssText = [
+      "font-size:clamp(32px,7vw,56px)",
+      "font-weight:800",
+      "text-align:center",
+      "direction:ltr",
+      "color:#fff",
+      "margin-top:18px",
+      "font-variant-numeric:tabular-nums"
+    ].join(";");
+  }
+
+  // מוודאים שיש LIVE וטיימר אחד בתוך אזור הקופה
+  if (label.parentElement !== pot) pot.appendChild(label);
+  if (timer.parentElement !== pot) pot.appendChild(timer);
+
+  timer.textContent = value;
+  timer.style.display = "";
+}
+
+  // רענון נתונים כדי לראות עדכונים ממשתמשים אחרים
+  async function refreshAll() {
+    await Promise.all([
+      loadParticipants(),
+      loadPot(),
+      loadRound()
+    ]);
+  }
+
+  // הפעלת הממשק
+  let refreshInProgress = false;
+
+async function init() {
+  await refreshAll();
+await loadLatestWinner();
+  // עדכון משתתפים והקופה כל 10 שניות
+  setInterval(async () => {
+    try {
+      await Promise.all([
+        loadParticipants(),
+        loadPot()
+      ]);
+    } catch (error) {
+      console.error("שגיאה בעדכון הנתונים:", error);
+    }
+  }, 10000);
+
+  // בדיקת מצב ההגרלה כל 5 שניות
+  setInterval(async () => {
+    if (refreshInProgress) return;
+
+    refreshInProgress = true;
+
+    try {
+      await loadRound();
+    } catch (error) {
+      console.error("שגיאה בעדכון ההגרלה:", error);
+    } finally {
+      refreshInProgress = false;
+    }
+  }, 5000);
+}
+
+async function loadLatestWinner() {
+  const { data, error } = await db.rpc(
+    "get_public_latest_winner_v2"
+  );
+
+  if (error) {
+    console.error("שגיאה בטעינת הזוכה:", error);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    updateLastWinner(null, null);
+    return;
+  }
+
+  const winner = data[0];
+
+  updateLastWinner(
+    winner.full_name,
+    winner.participant_code
+  );
+}
+
+
+
+  init();
+})();
+</script>
+</body>
+</html>
